@@ -15,9 +15,6 @@ AS5600 rightEncoder(&Wire1);
 AS5600 leftEncoder(&Wire1);
 
 void setupEncoders() {
-  Serial.begin(230400);
-  Wire1.begin();
-
   if (!multiplexer.begin(0x70, Wire1)) {
     Serial.println("Error: I2C multiplexer not found. Check wiring.");
     while (true);;

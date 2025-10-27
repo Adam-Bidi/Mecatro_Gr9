@@ -28,11 +28,6 @@ extern QWIICMUX multiplexer;
 
 void setupSensor()
 {
-  // Setup serial communication with the PC - for debugging and logging.
-  Serial.begin(230400);
-  // Start I2C communication on the QWIIC port
-  Wire1.begin();
-
   // Init multiplexer. Its I2C address is 0x70, and we communicate via the QWIIC port (Wire1).
   if (!multiplexer.begin(0x70, Wire1))
   {
