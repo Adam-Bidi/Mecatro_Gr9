@@ -27,13 +27,6 @@ extern QWIICMUX multiplexer;
 
 void setupSensor()
 {
-  //Command for the IR to run all the time
-  mySensorBar.clearBarStrobe();
-  //Default dark on light
-  mySensorBar.clearInvertBits();
-  //Other option: light line on dark
-  //mySensorBar.setInvertBits();
-  
   //Don't forget to call .begin() to get the bar ready.  This configures HW.
   multiplexer.setPort(SENSORBAR_PIN);
   uint8_t returnStatus = mySensorBar.begin();
@@ -42,6 +35,13 @@ void setupSensor()
     Serial.println("sx1509 IC communication FAILED!");
     while (true);; //We put this line so that the code is blocked infinitely at this line, which is what we want if some initialization has gone wrong
   }
+  mySensorBar.begin();
+  //Command for the IR to run all the time
+  mySensorBar.clearBarStrobe();
+  //Default dark on light
+  mySensorBar.clearInvertBits();
+  //Other option: light line on dark
+  //mySensorBar.setInvertBits();
 }
 
 int8_t readSensor() {

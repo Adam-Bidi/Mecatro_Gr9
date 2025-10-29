@@ -14,21 +14,25 @@
 #define WIFI_PASSWRD "12345678"
 #define CONTROL_LOOP_PERIOD 5 // en ms
 
+unsigned int const numReception = 4;
+float gains[numReception] = {8.0, 0.2, 50.0, 2.75}; //Les valeurs par défaut des gains du PID
+
 void setup() {
+  Wire1.begin();
+
   Serial.begin(230400);
 
   setupEncoders();
   setupSensor();
-  
-  // Start I2C communication on the QWIIC port
-  Wire1.begin();
 
   Wire1.setClock(400000);
   mecatro::configureArduino(CONTROL_LOOP_PERIOD);
 
-  unsigned int const nVariables = 5;
-  String variableNames[nVariables] = {"leftAngle" , "rightAngle" , "leftSpeed", "rightSpeed", "linePosition"};
-  mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
+  unsigned int const numEnvoi = 5;
+  String variableNames[numEnvoi] = {"leftAngle" , "rightAngle" , "leftSpeed", "rightSpeed", "linePosition"};
+
+  mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, numReception, variableNames, CONTROL_LOOP_PERIOD);
+  mecatro::recieveGains(numReception, gains);
 }
 
 void loop() {
@@ -49,7 +53,7 @@ void mecatro::controlLoop() {
   mecatro::log(3,  data.rightSpeed);
   mecatro::log(4, position);
 
-  MotorPWM pwm = controleur(data.leftAngle, data.rightAngle, position);
+  MotorPWM pwm = controleur(data.leftAngle, data.rightAngle, position, gains);
 
   mecatro::setMotorDutyCycle(pwm.left, pwm.right);
 }

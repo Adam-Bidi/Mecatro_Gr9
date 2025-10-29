@@ -1,11 +1,6 @@
 #include "controleur.h"
 #include <Arduino.h>
 
-float T = 8;
-float T_i = 0.2;
-float T_d = 50;
-
-float U_plus = 2.75;
 float U_bar = 0.1;
 
 float integral = 0;
@@ -19,7 +14,12 @@ float integrale(float lambda) { // On calcule l'intégrale de eta_prim soit eta
     return integral;
 }
 
-MotorPWM controleur(float leftAngle, float rightAngle, float linePosition) {
+MotorPWM controleur(float leftAngle, float rightAngle, float linePosition, float gains[4]) {
+  float T = gains[0];
+  float T_i = gains[1]; 
+  float T_d = gains[2];
+  float U_plus = gains[3]; 
+
   float psi = leftAngle - rightAngle; // les signes dépendent de l'orientation des encodeurs
   float lambda = linePosition;
 
