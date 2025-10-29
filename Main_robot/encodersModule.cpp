@@ -1,13 +1,12 @@
 #include <Arduino.h>
-#include "Config.h"
 #include "MecatroUtils.h"
 #include "encodersModule.h"
 #include "Wire.h"
 
 
 // Définition des constantes
-#define RIGHT_ENCODER_PIN 3
-#define LEFT_ENCODER_PIN 0
+#define RIGHT_ENCODER_PIN 0
+#define LEFT_ENCODER_PIN 3
 
 // Objets globaux internes à ce module
 QWIICMUX multiplexer;
