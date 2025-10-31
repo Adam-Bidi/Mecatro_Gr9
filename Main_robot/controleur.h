@@ -7,6 +7,7 @@ struct MotorPWM {
 };
 
 extern float U_bar;
+extern float U_batterie;
 extern float integral;
 extern unsigned long prevTime;
 

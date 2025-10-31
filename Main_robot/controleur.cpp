@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 float U_bar = 0.1;
+float U_batterie = 11.2;
 
 float integral = 0;
 unsigned long prevTime = 0;
@@ -28,8 +29,8 @@ MotorPWM controleur(float leftAngle, float rightAngle, float linePosition, float
 
   //U_ = tension_moteur_g - tension_moteur_d
 
-  float rot_mot_g = (U_plus + U_) / (2 * U_plus);
-  float rot_mot_d = (U_plus - U_) / (2 * U_plus);
+  float rot_mot_g = (U_plus + U_) / (2 * U_batterie);
+  float rot_mot_d = (U_plus - U_) / (2 * U_batterie);
 
   return MotorPWM{rot_mot_g, rot_mot_d};
 }

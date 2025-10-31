@@ -14,8 +14,7 @@
 #define WIFI_PASSWRD "12345678"
 #define CONTROL_LOOP_PERIOD 5 // en ms
 
-unsigned int const numReception = 4;
-float gains[numReception] = {8.0, 0.2, 50.0, 2.75}; //Les valeurs par défaut des gains du PID
+float gains[4] = {8.0, 0.2, 50.0, 2.75}; //Les valeurs par défaut des gains du PID
 
 void setup() {
   Wire1.begin();
@@ -28,11 +27,11 @@ void setup() {
   Wire1.setClock(400000);
   mecatro::configureArduino(CONTROL_LOOP_PERIOD);
 
-  unsigned int const numEnvoi = 5;
-  String variableNames[numEnvoi] = {"leftAngle" , "rightAngle" , "leftSpeed", "rightSpeed", "linePosition"};
+  unsigned int const nVariables = 5;
+  String variableNames[nVariables] = {"leftAngle" , "rightAngle" , "leftSpeed", "rightSpeed", "linePosition"};
 
-  mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, numReception, variableNames, CONTROL_LOOP_PERIOD);
-  mecatro::recieveGains(numReception, gains);
+  // mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
+  // mecatro::recieveGains(4, gains);
 }
 
 void loop() {
@@ -47,11 +46,11 @@ void mecatro::controlLoop() {
   int8_t position = readSensor();
 
   // The first argument is the variable (column) id ; recall that in C++, numbering starts at 0.
-  mecatro::log(0,  data.leftAngle);
-  mecatro::log(1,  data.rightAngle);
-  mecatro::log(2,  data.leftSpeed);
-  mecatro::log(3,  data.rightSpeed);
-  mecatro::log(4, position);
+  // mecatro::log(0,  data.leftAngle);
+  // mecatro::log(1,  data.rightAngle);
+  // mecatro::log(2,  data.leftSpeed);
+  // mecatro::log(3,  data.rightSpeed);
+  // mecatro::log(4, position);
 
   MotorPWM pwm = controleur(data.leftAngle, data.rightAngle, position, gains);
 

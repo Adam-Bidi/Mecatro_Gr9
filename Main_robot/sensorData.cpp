@@ -38,16 +38,15 @@ void setupSensor()
   mySensorBar.begin();
   //Command for the IR to run all the time
   mySensorBar.clearBarStrobe();
-  //Default dark on light
-  mySensorBar.clearInvertBits();
-  //Other option: light line on dark
-  //mySensorBar.setInvertBits();
+  mySensorBar.setInvertBits();
 }
 
 int8_t readSensor() {
-  int8_t linePosition;
+  int8_t linePosRaw;
+  float linePosition;
   // Set multiplexer to talk to line follower (we have to recall it in case we used another port meanwhile)
   multiplexer.setPort(SENSORBAR_PIN);
-  linePosition = mySensorBar.getPosition();
+  linePosRaw = mySensorBar.getPosition();
+  linePosition = linePosRaw * 4.585e-2 / 127; // We convert the raw position to meters
   return linePosition;
 }

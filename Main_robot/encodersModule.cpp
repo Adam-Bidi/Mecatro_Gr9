@@ -46,7 +46,7 @@ EncoderData readEncoders() {
 
   multiplexer.setPort(RIGHT_ENCODER_PIN);
   data.rightAngle = rightEncoder.rawAngle() * AS5600_RAW_TO_DEGREES;
-  data.rightAngle = rightEncoder.getAngularSpeed();
+  data.rightSpeed = rightEncoder.getAngularSpeed();
 
   multiplexer.setPort(LEFT_ENCODER_PIN);
   data.leftAngle = leftEncoder.rawAngle() * AS5600_RAW_TO_DEGREES;
