@@ -5,8 +5,7 @@
 float U_batterie = 11.2;
 
 float integral = 0;
-unsigned long prevTime = 0;
-
+unsigned long prevTime;
 
 float integrale(float lambda) { // On calcule l'intégrale de eta_prim soit eta
     unsigned long currentTime = micros(); // On utilise micros() pour plus de précision
@@ -30,17 +29,17 @@ MotorPWM controleur(EncoderData data, float linePosition, float gains[5], float 
   float lambda = linePosition;
 
   // PID
-  float U_ = - T * lambda - T_d * U_bar * psi - T_i * integrale(lambda);
+  float U_moins = - T * lambda - T_d * U_bar * psi - T_i * integrale(lambda);
 
-  //U_ = tension_moteur_g - tension_moteur_d
+  //U_moins = tension_moteur_g - tension_moteur_d
 
-  float rot_mot_g = (U_plus + U_) / (2 * U_batterie);
-  float rot_mot_d = (U_plus - U_) / (2 * U_batterie);
+  float rot_mot_g = (U_plus + U_moins) / (2 * U_batterie);
+  float rot_mot_d = (U_plus - U_moins) / (2 * U_batterie);
 
   Serial.print("U+ : ");
   Serial.print(U_plus);
   Serial.print("U_ : ");
-  Serial.print(U_);
+  Serial.print(U_moins);
   Serial.print("psi : ");
   Serial.print(psi);
   Serial.print("line position : ");
@@ -48,8 +47,11 @@ MotorPWM controleur(EncoderData data, float linePosition, float gains[5], float 
   mecatro::log(0,leftAngle);
   mecatro::log(1, rightAngle);
   mecatro::log(2, linePosition);
-  mecatro::log(3, U_);
-  mecatro::log(4, psi);
+  mecatro::log(3, U_plus);
+  mecatro::log(4, U_moins);
+  mecatro::log(5, psi);
+  mecatro::log(6, psi_ref);
+  mecatro::log(7,integrale(lambda));
 
   return MotorPWM{rot_mot_g, rot_mot_d};
   

@@ -3,6 +3,8 @@
 
 #include "encodersModule.h"
 
+extern unsigned long prevTime;
+
 struct MotorPWM {
   float left;
   float right;

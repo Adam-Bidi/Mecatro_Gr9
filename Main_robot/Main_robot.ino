@@ -28,11 +28,14 @@ void setup() {
   Wire1.setClock(400000);
   mecatro::configureArduino(CONTROL_LOOP_PERIOD);
 
-  unsigned int const nVariables = 5;
-  String variableNames[nVariables] = {"leftAngle" , "rightAngle" , "linePosition", "U_", "psi"};
+  unsigned int const nVariables = 8;
+  String variableNames[nVariables] = {"leftAngle" , "rightAngle" , "linePosition", "Uplus", "Umoins", "psi", "psiref", "integrale"};
 
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
   mecatro::recieveGains(5, gains);
+
+  unsigned long currentTime = micros();
+  prevTime = currentTime; // Once the setup is over, we reinitialize the value of prevTime, so that the first dt in the integral is not too big
 }
 
 void loop() {
@@ -46,16 +49,11 @@ void mecatro::controlLoop() {
   // Read the data from the sensor
   float position = readSensor();
 
-  // The first argument is the variable (column) id ; recall that in C++, numbering starts at 0.
-  // mecatro::log(0,  data.leftAngle);
-  // mecatro::log(1,  data.rightAngle);
-  // mecatro::log(2, position);
+  MotorPWM taux = controleur(data, position, gains, psi_ref);
 
-  MotorPWM pwm = controleur(data, position, gains, psi_ref);
-
-  mecatro::setMotorDutyCycle(pwm.left, pwm.right);
-  Serial.print("pwm :");
-  Serial.print(pwm.left);
+  mecatro::setMotorDutyCycle(taux.left, taux.right);
+  Serial.print("taux de rotation:");
+  Serial.print(taux.left);
   Serial.print(" ");
-  Serial.println(pwm.right);
+  Serial.println(taux.right);
 }

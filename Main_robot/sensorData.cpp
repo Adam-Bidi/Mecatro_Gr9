@@ -35,10 +35,9 @@ void setupSensor()
     Serial.println("sx1509 IC communication FAILED!");
     while (true);; //We put this line so that the code is blocked infinitely at this line, which is what we want if some initialization has gone wrong
   }
-  mySensorBar.begin();
   //Command for the IR to run all the time
   mySensorBar.clearBarStrobe();
-  mySensorBar.setInvertBits();
+  mySensorBar.clearInvertBits();
 }
 
 float readSensor() {
