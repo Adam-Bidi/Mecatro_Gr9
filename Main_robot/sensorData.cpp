@@ -41,12 +41,15 @@ void setupSensor()
   mySensorBar.setInvertBits();
 }
 
-int8_t readSensor() {
+float readSensor() {
   int8_t linePosRaw;
   float linePosition;
   // Set multiplexer to talk to line follower (we have to recall it in case we used another port meanwhile)
   multiplexer.setPort(SENSORBAR_PIN);
   linePosRaw = mySensorBar.getPosition();
-  linePosition = linePosRaw * 4.585e-2 / 127; // We convert the raw position to meters
+  Serial.print("linePosRaw : ");
+  Serial.print(linePosRaw);
+
+  linePosition = ((float)linePosRaw) * 4.585e-2 / 127; // We convert the raw position to meters
   return linePosition;
 }

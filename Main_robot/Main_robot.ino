@@ -14,24 +14,25 @@
 #define WIFI_PASSWRD "12345678"
 #define CONTROL_LOOP_PERIOD 5 // en ms
 
-float gains[4] = {8.0, 0.2, 50.0, 2.75}; //Les valeurs par défaut des gains du PID
+float psi_ref;
+float gains[5] = {672, 274, 672, 0.275, 0.01}; //Les valeurs par défaut des gains du PID : T, T_i, T_d, U+, U_bar
 
 void setup() {
   Wire1.begin();
 
   Serial.begin(230400);
 
-  setupEncoders();
+  psi_ref = setupEncoders();
   setupSensor();
 
   Wire1.setClock(400000);
   mecatro::configureArduino(CONTROL_LOOP_PERIOD);
 
   unsigned int const nVariables = 5;
-  String variableNames[nVariables] = {"leftAngle" , "rightAngle" , "leftSpeed", "rightSpeed", "linePosition"};
+  String variableNames[nVariables] = {"leftAngle" , "rightAngle" , "linePosition", "U_", "psi"};
 
-  // mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
-  // mecatro::recieveGains(4, gains);
+  mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
+  mecatro::recieveGains(5, gains);
 }
 
 void loop() {
@@ -43,16 +44,18 @@ void mecatro::controlLoop() {
   EncoderData data = readEncoders();
 
   // Read the data from the sensor
-  int8_t position = readSensor();
+  float position = readSensor();
 
   // The first argument is the variable (column) id ; recall that in C++, numbering starts at 0.
   // mecatro::log(0,  data.leftAngle);
   // mecatro::log(1,  data.rightAngle);
-  // mecatro::log(2,  data.leftSpeed);
-  // mecatro::log(3,  data.rightSpeed);
-  // mecatro::log(4, position);
+  // mecatro::log(2, position);
 
-  MotorPWM pwm = controleur(data.leftAngle, data.rightAngle, position, gains);
+  MotorPWM pwm = controleur(data, position, gains, psi_ref);
 
   mecatro::setMotorDutyCycle(pwm.left, pwm.right);
+  Serial.print("pwm :");
+  Serial.print(pwm.left);
+  Serial.print(" ");
+  Serial.println(pwm.right);
 }

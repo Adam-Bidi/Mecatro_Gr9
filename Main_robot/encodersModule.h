@@ -7,12 +7,10 @@
 struct EncoderData {
   float leftAngle;
   float rightAngle;
-  float leftSpeed;
-  float rightSpeed;
 };
 
 // Fonctions d'interface publiques
-void setupEncoders();
+float setupEncoders();
 EncoderData readEncoders();
 
 #endif

@@ -13,7 +13,7 @@ QWIICMUX multiplexer;
 AS5600 rightEncoder(&Wire1);
 AS5600 leftEncoder(&Wire1);
 
-void setupEncoders() {
+float setupEncoders() {
   if (!multiplexer.begin(0x70, Wire1)) {
     Serial.println("Error: I2C multiplexer not found. Check wiring.");
     while (true);;
@@ -39,18 +39,24 @@ void setupEncoders() {
   if (!isInit) {
     while (true);;
   }
+
+  // On établit le psi de référence et on le retranche aux valeurs suivantes de psi
+  multiplexer.setPort(RIGHT_ENCODER_PIN);
+  float rightAngleRef = rightEncoder.getCumulativePosition() * AS5600_RAW_TO_RADIANS;
+  multiplexer.setPort(LEFT_ENCODER_PIN);
+  float leftAngleRef = leftEncoder.getCumulativePosition() * AS5600_RAW_TO_RADIANS;
+  float psi_ref = leftAngleRef - rightAngleRef;
+  return psi_ref;
 }
 
 EncoderData readEncoders() {
   EncoderData data;
 
   multiplexer.setPort(RIGHT_ENCODER_PIN);
-  data.rightAngle = rightEncoder.rawAngle() * AS5600_RAW_TO_DEGREES;
-  data.rightSpeed = rightEncoder.getAngularSpeed();
+  data.rightAngle = rightEncoder.getCumulativePosition() * AS5600_RAW_TO_RADIANS;
 
   multiplexer.setPort(LEFT_ENCODER_PIN);
-  data.leftAngle = leftEncoder.rawAngle() * AS5600_RAW_TO_DEGREES;
-  data.leftSpeed = leftEncoder.getAngularSpeed();
-
+  data.leftAngle = leftEncoder.getCumulativePosition() * AS5600_RAW_TO_RADIANS;
+  
   return data;
 }

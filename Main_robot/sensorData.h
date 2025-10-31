@@ -8,6 +8,6 @@
 
 // Fonctions d'interface publiques
 void setupSensor();
-int8_t readSensor();
+float readSensor();
 
 #endif
