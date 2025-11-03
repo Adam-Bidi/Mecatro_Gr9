@@ -1,3 +1,4 @@
+#include <sys/_stdint.h>
 #include <Arduino.h>
 #include "MecatroUtils.h"
 #include "encodersModule.h"
@@ -13,7 +14,7 @@ QWIICMUX multiplexer;
 AS5600 rightEncoder(&Wire1);
 AS5600 leftEncoder(&Wire1);
 
-float setupEncoders() {
+int32_t setupEncoders(int32_t* psi_ref, int32_t* sum_ref) {
   if (!multiplexer.begin(0x70, Wire1)) {
     Serial.println("Error: I2C multiplexer not found. Check wiring.");
     while (true);;
@@ -42,21 +43,21 @@ float setupEncoders() {
 
   // On établit le psi de référence et on le retranche aux valeurs suivantes de psi
   multiplexer.setPort(RIGHT_ENCODER_PIN);
-  float rightAngleRef = rightEncoder.getCumulativePosition() * AS5600_RAW_TO_RADIANS;
+  int32_t rightAngleRef = rightEncoder.getCumulativePosition();
   multiplexer.setPort(LEFT_ENCODER_PIN);
-  float leftAngleRef = leftEncoder.getCumulativePosition() * AS5600_RAW_TO_RADIANS;
-  float psi_ref = leftAngleRef - rightAngleRef;
-  return psi_ref;
+  int32_t leftAngleRef = leftEncoder.getCumulativePosition();
+  *psi_ref = leftAngleRef - rightAngleRef;
+  *sum_ref = leftAngleRef + rightAngleRef;
 }
 
 EncoderData readEncoders() {
   EncoderData data;
 
   multiplexer.setPort(RIGHT_ENCODER_PIN);
-  data.rightAngle = rightEncoder.getCumulativePosition() * AS5600_RAW_TO_RADIANS;
+  data.rightAngle = rightEncoder.getCumulativePosition();
 
   multiplexer.setPort(LEFT_ENCODER_PIN);
-  data.leftAngle = leftEncoder.getCumulativePosition() * AS5600_RAW_TO_RADIANS;
+  data.leftAngle = leftEncoder.getCumulativePosition();
   
   return data;
 }

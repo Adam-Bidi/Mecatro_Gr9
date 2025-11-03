@@ -1,3 +1,4 @@
+#include <sys/_stdint.h>
 #ifndef SENSORS_MODULE_H
 #define SENSORS_MODULE_H
 
@@ -8,6 +9,7 @@
 
 // Fonctions d'interface publiques
 void setupSensor();
-float readSensor();
+int8_t readSensor();
+float linePositionIntToFloat(int8_t linePosRaw);
 
 #endif

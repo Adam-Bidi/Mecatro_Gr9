@@ -1,3 +1,4 @@
+#include <sys/_stdint.h>
 #ifndef CONTROLEUR_H
 #define CONTROLEUR_H
 
@@ -10,10 +11,10 @@ struct MotorPWM {
   float right;
 };
 
-extern float U_batterie;
 extern float integral;
+extern int32_t last_T;
 
-MotorPWM controleur(EncoderData data, float linePosition, float gains[4], float psi_ref);
+MotorPWM controleur(EncoderData data, int8_t linePosition, float gains[4], int32_t psi_ref);
 float integrale(float lambda);
 
 #endif

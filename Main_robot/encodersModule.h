@@ -1,3 +1,4 @@
+#include <sys/_stdint.h>
 #ifndef ENCODERS_MODULE_H
 #define ENCODERS_MODULE_H
 
@@ -5,12 +6,12 @@
 #include "SparkFun_I2C_Mux_Arduino_Library.h"
 
 struct EncoderData {
-  float leftAngle;
-  float rightAngle;
+  int32_t leftAngle;
+  int32_t rightAngle;
 };
 
 // Fonctions d'interface publiques
-float setupEncoders();
+int32_t setupEncoders(int32_t* psi_ref, int32_t* sum_ref);
 EncoderData readEncoders();
 
 #endif

@@ -14,27 +14,29 @@
 #define WIFI_PASSWRD "12345678"
 #define CONTROL_LOOP_PERIOD 5 // en ms
 
-float psi_ref;
-float gains[5] = {672, 274, 672, 0.275, 0.01}; //Les valeurs par défaut des gains du PID : T, T_i, T_d, U+, U_bar
+int32_t psi_ref;
+float gains[6] = {672, 274, 672, 39, 0.01}; //Les valeurs par défaut des gains du PID : T, T_i, T_d, S_i, U_bar
 
 void setup() {
   Wire1.begin();
 
   Serial.begin(230400);
 
-  psi_ref = setupEncoders();
+  int32_t psi_ref, sum_ref;
+  setupEncoders(&psi_ref, &sum_ref);
   setupSensor();
 
   Wire1.setClock(400000);
   mecatro::configureArduino(CONTROL_LOOP_PERIOD);
 
-  unsigned int const nVariables = 8;
-  String variableNames[nVariables] = {"leftAngle" , "rightAngle" , "linePosition", "Uplus", "Umoins", "psi", "psiref", "integrale"};
+  unsigned int const nVariables = 5;
+  String variableNames[nVariables] = {"Position ligne", "Uplus", "Umoins", "IntU", "Vitesse"};
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
   mecatro::recieveGains(5, gains);
 
   unsigned long currentTime = micros();
-  prevTime = currentTime; // Once the setup is over, we reinitialize the value of prevTime, so that the first dt in the integral is not too big
+  prevTime = currentTime + 5000; // Once the setup is over, we reinitialize the value of prevTime, so that the first dt in the integral is not too big
+  last_T = sum_ref;
 }
 
 void loop() {
@@ -46,7 +48,7 @@ void mecatro::controlLoop() {
   EncoderData data = readEncoders();
 
   // Read the data from the sensor
-  float position = readSensor();
+  int8_t position = readSensor();
 
   MotorPWM taux = controleur(data, position, gains, psi_ref);
 
