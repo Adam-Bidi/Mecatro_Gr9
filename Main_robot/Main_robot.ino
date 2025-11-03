@@ -30,7 +30,6 @@ void setup() {
 
   unsigned int const nVariables = 8;
   String variableNames[nVariables] = {"leftAngle" , "rightAngle" , "linePosition", "Uplus", "Umoins", "psi", "psiref", "integrale"};
-
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
   mecatro::recieveGains(5, gains);
 
