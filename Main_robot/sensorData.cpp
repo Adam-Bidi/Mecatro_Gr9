@@ -25,6 +25,8 @@ SensorBar mySensorBar(0x3E);
 
 extern QWIICMUX multiplexer;
 
+int32_t previousPos;
+
 void setupSensor()
 {
   //Don't forget to call .begin() to get the bar ready.  This configures HW.
@@ -40,15 +42,20 @@ void setupSensor()
   mySensorBar.clearInvertBits();
 }
 
-int8_t readSensor() {
-  int8_t linePosRaw;
+int32_t readSensor() {
+  int32_t linePosRaw;
   // Set multiplexer to talk to line follower (we have to recall it in case we used another port meanwhile)
   multiplexer.setPort(SENSORBAR_PIN);
   linePosRaw = mySensorBar.getPosition();
 
+  if (linePosRaw == 0 && abs(previousPos) >= 127) {
+    linePosRaw = (previousPos / abs(previousPos)) * 150;
+  }
+    previousPos = linePosRaw;
+
   return linePosRaw;
 }
 
-float linePositionIntToFloat(int8_t linePosRaw) {
+float linePositionIntToFloat(int32_t linePosRaw) {
   return ((float)linePosRaw) * 4.585e-2 / 127;
 }

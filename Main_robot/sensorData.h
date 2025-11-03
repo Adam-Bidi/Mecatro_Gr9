@@ -9,7 +9,7 @@
 
 // Fonctions d'interface publiques
 void setupSensor();
-int8_t readSensor();
-float linePositionIntToFloat(int8_t linePosRaw);
+int32_t readSensor();
+float linePositionIntToFloat(int32_t linePosRaw);
 
 #endif
