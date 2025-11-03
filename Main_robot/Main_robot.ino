@@ -19,23 +19,23 @@ float gains[6] = {672, 274, 672, 39, 0.01}; //Les valeurs par défaut des gains 
 
 void setup() {
   Wire1.begin();
-
   Serial.begin(230400);
 
   int32_t psi_ref, sum_ref;
   setupEncoders(&psi_ref, &sum_ref);
   setupSensor();
 
-  Wire1.setClock(400000);
-  mecatro::configureArduino(CONTROL_LOOP_PERIOD);
 
   unsigned int const nVariables = 5;
   String variableNames[nVariables] = {"Position ligne", "Uplus", "Umoins", "IntU", "Vitesse"};
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
   mecatro::recieveGains(5, gains);
 
+  Wire1.setClock(400000);
+  mecatro::configureArduino(CONTROL_LOOP_PERIOD);
+
   unsigned long currentTime = micros();
-  prevTime = currentTime + 5000; // Once the setup is over, we reinitialize the value of prevTime, so that the first dt in the integral is not too big
+  prevTime = currentTime - 5000; // Once the setup is over, we reinitialize the value of prevTime, so that the first dt in the integral is not too big
   last_T = sum_ref;
 }
 
@@ -48,13 +48,10 @@ void mecatro::controlLoop() {
   EncoderData data = readEncoders();
 
   // Read the data from the sensor
-  int8_t position = readSensor();
+  int32_t position = readSensor();
+  Serial.println(position);
 
   MotorPWM taux = controleur(data, position, gains, psi_ref);
 
   mecatro::setMotorDutyCycle(taux.left, taux.right);
-  Serial.print("taux de rotation:");
-  Serial.print(taux.left);
-  Serial.print(" ");
-  Serial.println(taux.right);
 }

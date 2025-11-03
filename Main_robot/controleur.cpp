@@ -23,12 +23,11 @@ float integrale(float lambda) { // On calcule l'intégrale de eta_prim soit eta
 
 float integraleU(int32_t sum, float U_bar) {
   integralU += U_bar * dt - (sum - last_T) / 50 * AS5600_RAW_TO_RADIANS;
-  Serial.print("   "); Serial.print(dt); Serial.print("    "); Serial.print(integralU); Serial.print("    "); Serial.print(sum - last_T); Serial.print("    ");
   last_T = sum;
   return integralU;
 }
 
-MotorPWM controleur(EncoderData data, int8_t linePosition, float gains[5], int32_t psi_ref) {
+MotorPWM controleur(EncoderData data, int32_t linePosition, float gains[5], int32_t psi_ref) {
   int32_t leftAngle = data.leftAngle;
   int32_t rightAngle = data.rightAngle;
 
@@ -56,18 +55,6 @@ MotorPWM controleur(EncoderData data, int8_t linePosition, float gains[5], int32
   float rot_mot_g = (U_plus + U_moins) / (2 * U_batterie);
   float rot_mot_d = (U_plus - U_moins) / (2 * U_batterie);
 
-  Serial.print(" U+ : ");
-  Serial.print(U_plus);
-  Serial.print(" U_ : ");
-  Serial.print(U_moins);
-  Serial.print(" psi : ");
-  Serial.print(psi);
-  Serial.print(" line position : ");
-  Serial.print(linePosition);
-  Serial.print(" dt : ");
-  Serial.print(dt);
-  Serial.print(" Vitesse : ");
-  Serial.print(U_i);
   mecatro::log(0, linePosition);
   mecatro::log(1, U_plus);
   mecatro::log(2, U_moins);
