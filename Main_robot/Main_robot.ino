@@ -1,7 +1,4 @@
 // The global code of what will the robot do
-// TODO : Wifi communication
-// TODO : Extrapolate the position of the line when the line follower is all white. Problem : the getPosition function from sensorbar.cpp does not distinguish the case where the line is exactly under the sensor and the one where there is no line under it. Possible solution : code my own getposition function
-// TODO : Implement the interruptions in the code
 
 #include <Arduino.h>
 #include "MecatroUtils.h"
@@ -17,11 +14,14 @@
 int32_t psi_ref;
 float gains[6] = {672, 274, 672, 39, 0.01}; //Les valeurs par défaut des gains du PID : T, T_i, T_d, S_i, U_bar
 
+int lostCounter = 0;
+const int LOST_LIMIT = 200;
+
 void setup() {
   Wire1.begin();
   Serial.begin(230400);
 
-  int32_t psi_ref, sum_ref;
+  int32_t sum_ref;
   setupEncoders(&psi_ref, &sum_ref);
   setupSensor();
 
@@ -50,6 +50,18 @@ void mecatro::controlLoop() {
   // Read the data from the sensor
   int32_t position = readSensor();
   Serial.println(position);
+
+  if (abs(position) > 127) {
+    lostCounter++;
+  } else {
+    lostCounter = 0;
+  }
+
+  if (lostCounter > LOST_LIMIT) {
+    mecatro::setMotorDutyCycle(0.0, 0.0);
+    Serial.println("Ligne perdue trop longtemps, arrêt de sécurité.");
+    while (true);;
+  }
 
   MotorPWM taux = controleur(data, position, gains, psi_ref);
 
