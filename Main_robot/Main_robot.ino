@@ -15,7 +15,9 @@
 
 //D'une manière générale, nous essayons de garder les valeurs brutes pour pouvoir garder des entiers qui occupent moins d'espace mémoire que les flottants.
 int32_t psi_ref;
-float gains[5] = {672, 274, 672, 39, 0.01}; //Les valeurs par défaut des gains du PID : T, T_i, T_d, S_i, U_bar
+float PID_1[3] = {672, 274, 672};
+float PID_2[3] = {672, 274, 672};
+float gains[2] = {39, 0.01}; //Les valeurs par défaut des gains du PID : T, T_i, T_d, S_i, U_bar
 
 int lostCounter = 0;
 const int LOST_LIMIT = 200;
@@ -31,7 +33,15 @@ void setup() {
   unsigned int const nVariables = 8;
   String variableNames[nVariables] = {"Position ligne", "Uplus", "Umoins", "IntU", "Vitesse", "psi", "intLambda", "dt"};
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
-  mecatro::recieveGains(5, gains);
+  Serial.println("Telemetry");
+
+  float recv[9];
+  mecatro::recieveGains(9, recv);
+  for (int i = 0; i < 3; i++) {
+    PID_1[i] = recv[i];
+    PID_2[i] = recv[i + 3];
+    gains[i] = recv[i + 6];
+  }
 
   mecatro::configureArduino(CONTROL_LOOP_PERIOD);
   mecatro::setMotorDutyCycle(0., 0.);
@@ -39,6 +49,7 @@ void setup() {
   unsigned long currentTime = micros();
   prevTime = currentTime; //On réinitialise la valeur de prevTime une fois le setup fini, car sinon le premier dt serait trop grand
   last_T = sum_ref;
+  Serial.println("Init");
 }
 
 void loop() {
@@ -61,7 +72,7 @@ void mecatro::controlLoop() {
     while (true);;
   }
 
-  MotorPWM taux = controleur(data, position, gains, psi_ref);
+  MotorPWM taux = controleur(data, position, PID_1, PID_2, gains, psi_ref);
 
   mecatro::setMotorDutyCycle(taux.left, taux.right);
 }

@@ -20,6 +20,13 @@ float integralU = 0;
 int32_t last_T = 0;
 
 int nLoop = 0;
+const int nValues = 20;
+int values[nValues];
+int iValues = 0;
+int moyLambda = 0;
+
+float* Active_PID;
+float U_bar;
 
 float integrale(float lambda) {
   integral += lambda * dt;
@@ -32,19 +39,40 @@ float integraleU(int32_t sum, float U_bar) {
   return integralU;
 }
 
-MotorPWM controleur(EncoderData data, int32_t linePosition, float gains[5], int32_t psi_ref) {
+MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], float PID_2[3], float gains[2], int32_t psi_ref) {
   int32_t leftAngle = data.leftAngle;
   int32_t rightAngle = data.rightAngle;
 
-  float T = gains[0];
-  float T_i = gains[1]; 
-  float T_d = gains[2];
-  float S_i = gains[3];
-  float U_bar = gains[4];
+  float S_i = gains[0];
+  float U_bar1 = gains[1];
+  float U_bar2 = gains[1];
 
   // Gain de l/rho sur la mesure des angles
   float psi = (leftAngle - rightAngle - psi_ref) * 0.2 * AS5600_RAW_TO_RADIANS; // Les signes dépendent de l'orientation des encodeurs
+
+  // Calcul de la moyenne des lambda
+  moyLambda -= values[iValues];
+  values[iValues] = linePosition;
+  moyLambda += linePosition;
+  iValues += 1;
+  if (iValues >= nValues) iValues = 0;
+
+  // PID_1 : ligne droite
+  if (abs(moyLambda) >= nValues * 50) {
+    Active_PID = PID_2;
+    U_bar = U_bar2;
+  }
+  else {
+    Active_PID = PID_1;
+    U_bar = U_bar1;
+  }
+
   float lambda = linePositionIntToFloat(linePosition);
+
+  float T = Active_PID[0];
+  float T_i = Active_PID[1]; 
+  float T_d = Active_PID[2];
+  Serial.print(T); Serial.print(T_i); Serial.println(T_d);
 
   // PID
   float U_minus = - T * lambda - T_d * psi - T_i * integrale(lambda);
@@ -60,7 +88,7 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float gains[5], int3
   float rot_mot_l = (U_plus + U_minus) / U_battery / 2;
   float rot_mot_r = (U_plus - U_minus) / U_battery / 2;
 
-  mecatro::log(0, linePosition);
+  mecatro::log(0, moyLambda);
   mecatro::log(1, U_plus);
   mecatro::log(2, U_minus);
   mecatro::log(3, integralU);
