@@ -41,7 +41,7 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float gains[5], int3
   float U_bar = gains[4];
 
   // Gain de l/rho sur la mesure des angles
-  float psi = (leftAngle - rightAngle - psi_ref) * 0.2 * AS5600_RAW_TO_RADIANS; // les signes dépendent de l'orientation des encodeurs
+  float psi = (leftAngle - rightAngle - psi_ref) * 0.2 * AS5600_RAW_TO_RADIANS; // Les signes dépendent de l'orientation des encodeurs
   float lambda = linePositionIntToFloat(linePosition);
 
   // PID
@@ -61,7 +61,9 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float gains[5], int3
   mecatro::log(0, linePosition);
   mecatro::log(1, U_plus);
   mecatro::log(2, U_minus);
+  mecatro::log(3, integralU);
   mecatro::log(4, U_i);
+  mecatro::log(5, dt * 1000);
 
   prevTime = currentTime;
   currentTime = micros(); // On utilise micros() pour plus de précision

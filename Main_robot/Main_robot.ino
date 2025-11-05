@@ -27,8 +27,8 @@ void setup() {
   setupEncoders(&psi_ref, &sum_ref);
   setupSensor();
 
-  unsigned int const nVariables = 5;
-  String variableNames[nVariables] = {"Position ligne", "Uplus", "Umoins", "IntU", "Vitesse"};
+  unsigned int const nVariables = 6;
+  String variableNames[nVariables] = {"Position ligne", "Uplus", "Uminus", "IntU", "Vitesse", "dt"};
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
   mecatro::recieveGains(5, gains);
 
@@ -36,7 +36,7 @@ void setup() {
   mecatro::configureArduino(CONTROL_LOOP_PERIOD);
 
   unsigned long currentTime = micros();
-  prevTime = currentTime - 5000; //On réinitialise la valeur de prevTime une fois le setup fini, car sinon le premier dt serait trop grand
+  prevTime = currentTime; //On réinitialise la valeur de prevTime une fois le setup fini, car sinon le premier dt serait trop grand
   last_T = sum_ref;
 }
 
