@@ -6,6 +6,7 @@
 #include "encodersModule.h"
 #include "sensorData.h"
 #include "controleur.h"
+#include "teleguidage.h"
 
 //On définit le nom et le mot de passe du réseau Wifi
 #define WIFI_SSID "ArduinoMecatroGr9"
