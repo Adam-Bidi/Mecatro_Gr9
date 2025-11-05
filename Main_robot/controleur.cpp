@@ -19,6 +19,8 @@ float integralU = 0;
 
 int32_t last_T = 0;
 
+int nLoop = 0;
+
 float integrale(float lambda) {
   integral += lambda * dt;
   return integral;
@@ -48,25 +50,30 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float gains[5], int3
   float U_minus = - T * lambda - T_d * psi - T_i * integrale(lambda);
   // float U_minus = 0;
 
-  float U_i = integraleU(leftAngle + rightAngle - psi_ref, U_bar);
+  float U_i = integraleU(leftAngle + rightAngle - psi_ref, U_bar * nLoop / 200);
   float U_plus = S_i * U_i;
 
   U_plus = min(12, max(0, U_plus));
 
   //U_minus = tension_moteur_g - tension_moteur_d
 
-  float rot_mot_l = (U_plus + U_minus) / (2 * U_battery);
-  float rot_mot_r = (U_plus - U_minus) / (2 * U_battery);
+  float rot_mot_l = (U_plus + U_minus) / U_battery / 2;
+  float rot_mot_r = (U_plus - U_minus) / U_battery / 2;
 
   mecatro::log(0, linePosition);
   mecatro::log(1, U_plus);
   mecatro::log(2, U_minus);
   mecatro::log(3, integralU);
   mecatro::log(4, U_i);
-  mecatro::log(5, dt * 1000);
+  mecatro::log(5, psi);
+  mecatro::log(6, integral);
+  mecatro::log(7, dt);
 
   prevTime = currentTime;
   currentTime = micros(); // On utilise micros() pour plus de précision
-  dt = (currentTime - prevTime) * 1e-6; // On convertit les microsecondes en secondes
+  dt = min(10e-3, (currentTime - prevTime) * 1e-6); // On convertit les microsecondes en secondes
+  if (nLoop < 200) {
+    nLoop += 1;
+  }
   return MotorPWM{rot_mot_l, rot_mot_r};
 }
