@@ -1,20 +1,18 @@
 #include <sys/_stdint.h>
 #include <Arduino.h>
+#include "AS5600.h"
 #include "MecatroUtils.h"
 #include "encodersModule.h"
-#include "Wire.h"
+#include "SparkFun_I2C_Mux_Arduino_Library.h"
 
-
-// Définition des constantes
 #define RIGHT_ENCODER_PIN 0
 #define LEFT_ENCODER_PIN 3
 
-// Objets globaux internes à ce module
 QWIICMUX multiplexer;
 AS5600 rightEncoder(&Wire1);
 AS5600 leftEncoder(&Wire1);
 
-int32_t setupEncoders(int32_t* psi_ref, int32_t* sum_ref) {
+void setupEncoders(int32_t* psi_ref, int32_t* sum_ref) {
   if (!multiplexer.begin(0x70, Wire1)) {
     Serial.println("Error: I2C multiplexer not found. Check wiring.");
     while (true);;
@@ -22,7 +20,6 @@ int32_t setupEncoders(int32_t* psi_ref, int32_t* sum_ref) {
 
   bool isInit = true;
 
-  // Initialisation du code d’origine
   multiplexer.setPort(RIGHT_ENCODER_PIN);
   rightEncoder.begin();
   if (!rightEncoder.isConnected()) {
@@ -41,11 +38,12 @@ int32_t setupEncoders(int32_t* psi_ref, int32_t* sum_ref) {
     while (true);;
   }
 
-  // On établit le psi de référence et on le retranche aux valeurs suivantes de psi
+  // On établit le psi de référence (valeur à t=0) que l'on retranchera aux valeurs suivantes de psi
   multiplexer.setPort(RIGHT_ENCODER_PIN);
   int32_t rightAngleRef = rightEncoder.getCumulativePosition();
   multiplexer.setPort(LEFT_ENCODER_PIN);
   int32_t leftAngleRef = leftEncoder.getCumulativePosition();
+
   *psi_ref = leftAngleRef - rightAngleRef;
   *sum_ref = leftAngleRef + rightAngleRef;
 }

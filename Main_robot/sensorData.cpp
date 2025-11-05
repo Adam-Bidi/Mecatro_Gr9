@@ -1,55 +1,39 @@
-/* Demo code for reading the encoders of the robot.
+//Le code pour intialiser le capteur de ligne et lire ses données
 
-  Note: this code requires the following libraries (install them through the library manager):
-     - SparkFun I2C Mux Arduino Library
-     - AS5600 library
-*/
-
+#include <sys/_stdint.h>
 #include <Arduino.h>
-// Include the current library
 #include "MecatroUtils.h"
-
-// Include the SensorBar library (for Line Follower) and Sparkfun I2C Mux (for multiplexer)
-#include "sensorbar.h"
+#include "sensorData.h"
+#include "AS5600.h"
 #include "SparkFun_I2C_Mux_Arduino_Library.h"
+#include "sensorbar.h"
 
-// Header for I2C communication
-#include "Wire.h"
-
-// Wire1 is used for the Qwiic connector on this Arduino board. 
-//SensorBar mySensorBar(SX1509_ADDRESS);
 SensorBar mySensorBar(0x3E);
 
-// Define the port numbers
 #define SENSORBAR_PIN 3
 
 extern QWIICMUX multiplexer;
 
-int32_t previousPos;
+int32_t previousPos = 0;
 
-void setupSensor()
-{
-  //Don't forget to call .begin() to get the bar ready.  This configures HW.
+void setupSensor() {
   multiplexer.setPort(SENSORBAR_PIN);
   uint8_t returnStatus = mySensorBar.begin();
-  if(!returnStatus)
-  {
+  if(!returnStatus) {
     Serial.println("sx1509 IC communication FAILED!");
-    while (true);; //We put this line so that the code is blocked infinitely at this line, which is what we want if some initialization has gone wrong
+    while (true);; //Si l'initialisation se passe mal, le code reste indéfiniment dans cette ligne
   }
-  //Command for the IR to run all the time
   mySensorBar.clearBarStrobe();
   mySensorBar.clearInvertBits();
 }
 
 int32_t readSensor() {
   int32_t linePosRaw;
-  // Set multiplexer to talk to line follower (we have to recall it in case we used another port meanwhile)
   multiplexer.setPort(SENSORBAR_PIN);
-  linePosRaw = mySensorBar.getPosition();
-
-  if (linePosRaw == 0 && abs(previousPos) >= 127) {
-    linePosRaw = (previousPos / abs(previousPos)) * 150;
+  linePosRaw = mySensorBar.getPosition(); //get.position() renvoie un entier entre -127 et 127, où +-127 correspond à une position extrême de la ligne, et 0 indique que la ligne est soit parfaitement centrée, soit que tout est blanc.
+  //Méthode d'extrapolation de la position : si le capteur perd la ligne, il essaie de la retrouver à partir de sa dernière position
+  if (linePosRaw == 0 && abs(previousPos) >= 127) { //Condition de perte de la ligne
+    linePosRaw = (previousPos / abs(previousPos)) * 150; //On redéfinit arbitrairement linePosRaw à +-150 pour que le robot se replace plus rapidement sur la ligne
   }
     previousPos = linePosRaw;
 
@@ -57,5 +41,5 @@ int32_t readSensor() {
 }
 
 float linePositionIntToFloat(int32_t linePosRaw) {
-  return ((float)linePosRaw) * 4.585e-2 / 127;
+  return linePosRaw * 4.585e-2 / 127; //On convertit la position brute en position en mètres. 4.585e-2 correspond à la demi-longueur du capteur de ligne
 }

@@ -1,22 +1,25 @@
+//Le code du contrôleur
+
 #include <sys/_stdint.h>
 #include <Arduino.h>
 #include "MecatroUtils.h"
-#include "AS5600.h"
 #include "controleur.h"
+#include "AS5600.h"
+#include "encodersModule.h"
 #include "sensorData.h"
 
-const float U_batterie = 11.2;
+const float U_battery = 11.2;
 
-float dt = 5e-3;
+float dt = 5e-3; //On initialise le dt à 5 ms, qui correspond à CONTROL_LOOP_PERIOD
 unsigned long prevTime;
 unsigned long currentTime;
 
-float integral = 0;
+float integral = 0; //On initialise les integrales
 float integralU = 0;
 
 int32_t last_T = 0;
 
-float integrale(float lambda) { // On calcule l'intégrale de eta_prim soit eta
+float integrale(float lambda) {
   integral += lambda * dt;
   return integral;
 }
@@ -42,26 +45,26 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float gains[5], int3
   float lambda = linePositionIntToFloat(linePosition);
 
   // PID
-  float U_moins = - T * lambda - T_d * psi - T_i * integrale(lambda);
-  // float U_moins = 0;
+  float U_minus = - T * lambda - T_d * psi - T_i * integrale(lambda);
+  // float U_minus = 0;
 
   float U_i = integraleU(leftAngle + rightAngle - psi_ref, U_bar);
   float U_plus = S_i * U_i;
 
   U_plus = min(12, max(0, U_plus));
 
-  //U_moins = tension_moteur_g - tension_moteur_d
+  //U_minus = tension_moteur_g - tension_moteur_d
 
-  float rot_mot_g = (U_plus + U_moins) / (2 * U_batterie);
-  float rot_mot_d = (U_plus - U_moins) / (2 * U_batterie);
+  float rot_mot_l = (U_plus + U_minus) / (2 * U_battery);
+  float rot_mot_r = (U_plus - U_minus) / (2 * U_battery);
 
   mecatro::log(0, linePosition);
   mecatro::log(1, U_plus);
-  mecatro::log(2, U_moins);
+  mecatro::log(2, U_minus);
   mecatro::log(4, U_i);
 
   prevTime = currentTime;
   currentTime = micros(); // On utilise micros() pour plus de précision
   dt = (currentTime - prevTime) * 1e-6; // On convertit les microsecondes en secondes
-  return MotorPWM{rot_mot_g, rot_mot_d};
+  return MotorPWM{rot_mot_l, rot_mot_r};
 }

@@ -1,4 +1,3 @@
-#include <sys/_stdint.h>
 #ifndef ENCODERS_MODULE_H
 #define ENCODERS_MODULE_H
 
@@ -10,8 +9,7 @@ struct EncoderData {
   int32_t rightAngle;
 };
 
-// Fonctions d'interface publiques
-int32_t setupEncoders(int32_t* psi_ref, int32_t* sum_ref);
+void setupEncoders(int32_t* psi_ref, int32_t* sum_ref);
 EncoderData readEncoders();
 
 #endif
