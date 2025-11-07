@@ -9,6 +9,7 @@
 #include "sensorData.h"
 
 const float U_battery = 11.2;
+int32_t NIter = 200;
 
 float dt = 5e-3; //On initialise le dt à 5 ms, qui correspond à CONTROL_LOOP_PERIOD
 unsigned long prevTime;
@@ -50,8 +51,6 @@ float derivee(float psi) {
 MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], float PID_2[3], float gains[3], int32_t psi_ref) {
   int32_t leftAngle = data.leftAngle;
   int32_t rightAngle = data.rightAngle;
-
-  int32_t NIter = 200;
 
   float S_i = gains[0];
   float U_bar1 = gains[1];
