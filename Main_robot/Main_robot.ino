@@ -15,9 +15,9 @@
 
 //D'une manière générale, nous essayons de garder les valeurs brutes pour pouvoir garder des entiers qui occupent moins d'espace mémoire que les flottants.
 int32_t psi_ref;
-float PID_1[3] = {672, 274, 672};
+float PID_1[3] = {672, 274, 672}; // T, T_i, T_d
 float PID_2[3] = {672, 274, 672};
-float gains[2] = {39, 0.01}; //Les valeurs par défaut des gains du PID : T, T_i, T_d, S_i, U_bar
+float gains[3] = {39, 0.01, 0.01}; //Les valeurs par défaut des gains du PID : S_i, U_bar1, U_bar2
 
 int lostCounter = 0;
 const int LOST_LIMIT = 200;
@@ -30,8 +30,8 @@ void setup() {
   setupEncoders(&psi_ref, &sum_ref);
   setupSensor();
 
-  unsigned int const nVariables = 8;
-  String variableNames[nVariables] = {"Position ligne", "Uplus", "Umoins", "IntU", "Vitesse", "psi", "intLambda", "dt"};
+  unsigned int const nVariables = 9;
+  String variableNames[nVariables] = {"Position ligne", "Uplus", "Umoins", "IntU", "Vitesse", "psi", "intLambda", "dt", "psiDot"};
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
   Serial.println("Telemetry");
 

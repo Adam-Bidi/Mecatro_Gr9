@@ -16,6 +16,8 @@ unsigned long currentTime;
 
 float integral = 0; //On initialise les integrales
 float integralU = 0;
+float lastPsi = 0;
+float psiDot;
 
 int32_t last_T = 0;
 
@@ -39,16 +41,25 @@ float integraleU(int32_t sum, float U_bar) {
   return integralU;
 }
 
-MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], float PID_2[3], float gains[2], int32_t psi_ref) {
+float derivee(float psi) {
+  psiDot = (psi - lastPsi) / dt;
+  lastPsi = psi;
+  return psiDot;
+}
+
+MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], float PID_2[3], float gains[3], int32_t psi_ref) {
   int32_t leftAngle = data.leftAngle;
   int32_t rightAngle = data.rightAngle;
 
+  int32_t NIter = 200;
+
   float S_i = gains[0];
   float U_bar1 = gains[1];
-  float U_bar2 = gains[1];
+  float U_bar2 = gains[2];
 
   // Gain de l/rho sur la mesure des angles
   float psi = (leftAngle - rightAngle - psi_ref) * 0.2 * AS5600_RAW_TO_RADIANS; // Les signes dépendent de l'orientation des encodeurs
+  float psiDot = derivee(psi);
 
   // Calcul de la moyenne des lambda
   moyLambda -= values[iValues];
@@ -58,14 +69,18 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
   if (iValues >= nValues) iValues = 0;
 
   // PID_1 : ligne droite
-  if (abs(moyLambda) >= nValues * 50) {
+  if (psiDot > 0.5 & NIter == 200) {
     Active_PID = PID_2;
     U_bar = U_bar2;
+    NIter = 0;
   }
-  else {
+  else if (psiDot <= 0.5 & NIter == 200) {
     Active_PID = PID_1;
     U_bar = U_bar1;
+    NIter = 0;
   }
+
+  NIter += 1;
 
   float lambda = linePositionIntToFloat(linePosition);
 
@@ -96,6 +111,7 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
   mecatro::log(5, psi);
   mecatro::log(6, integral);
   mecatro::log(7, dt);
+  mecatro::log(8, psiDot);
 
   prevTime = currentTime;
   currentTime = micros(); // On utilise micros() pour plus de précision
