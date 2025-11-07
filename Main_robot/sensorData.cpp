@@ -14,7 +14,7 @@ SensorBar mySensorBar(0x3E);
 
 extern QWIICMUX multiplexer;
 
-int32_t previousPos = 0;
+int32_t previousPos = 1;
 
 void setupSensor() {
   multiplexer.setPort(SENSORBAR_PIN);
@@ -33,7 +33,7 @@ int32_t readSensor() {
   linePosRaw = mySensorBar.getPosition(); //get.position() renvoie un entier entre -127 et 127, où +-127 correspond à une position extrême de la ligne, et 0 indique que la ligne est soit parfaitement centrée, soit que tout est blanc.
   
   //Méthode d'extrapolation de la position : si le capteur perd la ligne, il essaie de la retrouver à partir de sa dernière position
-  if (linePosRaw == 0 && abs(previousPos) >= 127) { //Condition de perte de la ligne
+  if (mySensorBar.getDensity() == 0) { //Condition de perte de la ligne
     linePosRaw = (previousPos / abs(previousPos)) * 150; //On redéfinit arbitrairement linePosRaw à +-150 pour que le robot se replace plus rapidement sur la ligne
   }
     previousPos = linePosRaw;
