@@ -1,4 +1,4 @@
-addpath("Mecarduino\")
+addpath("")
 
 %WiFi settings
 IP = '192.168.4.1';
@@ -15,16 +15,16 @@ Tmax = 30;
 method = 'WiFi';
 
 %Gains
-uBar1 = 0.5;
-sigma = 4;
+uBar1 = 0.6;
+sigma = 10;
 coeffs = K(uBar1, sigma);
 K1_send = [coeffs(2),  coeffs(1), coeffs(3)];
 
-uBar2 = 0.3;
-sigma = 4;
+uBar2 = 0.4;
+sigma = 8;
 coeffs = K(uBar2, sigma);
 K2_send = [coeffs(2),  coeffs(1), coeffs(3)];
-gains = [39, uBar1, uBar2];
+gains = [39, uBar1, uBar2, 4.];
 
 K_send = [K1_send, K2_send, gains]
 

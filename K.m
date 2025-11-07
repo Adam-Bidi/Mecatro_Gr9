@@ -1,5 +1,5 @@
 function k = K (u, sigma)
-    run("Mecarduino\grandeurs.m")
+    run("grandeurs.m")
     AsinCL = [0, 1, 0;
         0, 0, u;
         0, 0, 0];

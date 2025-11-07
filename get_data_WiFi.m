@@ -89,11 +89,10 @@ while ~should_terminate
 
     try
         % Connect to WiFi
-        client_socket = tcpclient(IP, PORT_NUMBER, 'Timeout', 1.0);
+        client_socket = tcpclient(IP, PORT_NUMBER, 'Timeout', 10.0);
         write(client_socket, 's', 'char');
         % Send gains - hard-coded for example
         send_gains_to_robot(gains, client_socket)
-
         ser = client_socket;
 
         status_message{end+1} = 'Connected, waiting for Arduino to boot';
