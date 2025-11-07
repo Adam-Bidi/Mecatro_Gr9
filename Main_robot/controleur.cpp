@@ -83,7 +83,7 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
     U_bar = U_bar2;
     NIter = 0;
   }
-  else if (abs(moyPsiDot) <= psiDotSeuil * nValues && NIter >= 100 && Active_PID == PID_2) {
+  else if (abs(moyPsiDot) <= psiDotSeuil * nValues && NIter >= 200 && Active_PID == PID_2) {
     Active_PID = PID_1;
     Active = 1;
     U_bar = U_bar1;
@@ -106,6 +106,8 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
   float U_plus = S_i * U_i;
 
   U_plus = min(24, max(0, U_plus));
+
+  if (nLoop < 200) U_minus = min(5, max(-5, U_minus));
 
   //U_minus = tension_moteur_g - tension_moteur_d
 
