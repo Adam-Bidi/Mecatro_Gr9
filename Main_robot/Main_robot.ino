@@ -17,7 +17,7 @@
 int32_t psi_ref;
 float PID_1[3] = {672, 274, 672}; // T, T_i, T_d
 float PID_2[3] = {672, 274, 672};
-float gains[3] = {39, 0.01, 0.01}; //Les valeurs par défaut des gains du PID : S_i, U_bar1, U_bar2
+float gains[4] = {39, 0.01, 0.01, 1.}; //Les valeurs par défaut des gains du PID : S_i, U_bar1, U_bar2
 
 int lostCounter = 0;
 const int LOST_LIMIT = 200;
@@ -35,13 +35,15 @@ void setup() {
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
   Serial.println("Telemetry");
 
-  float recv[9];
-  mecatro::recieveGains(9, recv);
+  const int nGains = 10;
+  float recv[nGains];
+  mecatro::recieveGains(nGains, recv);
   for (int i = 0; i < 3; i++) {
     PID_1[i] = recv[i];
     PID_2[i] = recv[i + 3];
     gains[i] = recv[i + 6];
   }
+  gains[3] = recv[9];
 
   mecatro::configureArduino(CONTROL_LOOP_PERIOD);
   mecatro::setMotorDutyCycle(0., 0.);
