@@ -28,9 +28,11 @@ int values[nValues];
 int iValues = 0;
 int moyPsiDot = 0;
 
-float* Active_PID;
+float Active_PID[3];
+// 1 : PID_1, 2 : PID_2, 3 : PID_1->PID_2, 4 : PID_2->PID_1
 int Active = 1;
 float U_bar;
+const int nTransition = 10;  // Nombre de points pour la transition
 
 float integrale(float lambda) {
   integral += lambda * dt;
@@ -62,13 +64,6 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
   float psi = (leftAngle - rightAngle - psi_ref) * 0.2 * AS5600_RAW_TO_RADIANS; // Les signes dépendent de l'orientation des encodeurs
   float psiDot = derivee(psi);
 
-  if (nLoop < 200) {
-    psiDot = 0;
-    Active_PID = PID_1;
-    U_bar = U_bar1;
-    Active = 1;
-  }
-
   // Calcul de la moyenne des lambda
   moyPsiDot -= values[iValues];
   values[iValues] = psiDot;
@@ -77,19 +72,42 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
   if (iValues >= nValues) iValues = 0;
 
   // PID_1 : ligne droite
-  if (abs(moyPsiDot) > psiDotSeuil * nValues && Active_PID == PID_1) {
-    Active_PID = PID_2;
+  if (abs(moyPsiDot) > psiDotSeuil * nValues && Active == 1) {
     Active = 2;
-    U_bar = U_bar2;
     NIter = 0;
   }
-  else if (abs(moyPsiDot) <= psiDotSeuil * nValues && NIter >= 200 && Active_PID == PID_2) {
-    Active_PID = PID_1;
+  else if (abs(moyPsiDot) <= psiDotSeuil * nValues && NIter >= 200 && Active == 2) {
     Active = 1;
-    U_bar = U_bar1;
     NIter = 0;
   }
   NIter += 1;
+
+  /*
+   * Combinaison linéaire pour le passage d'un mode à l'autre
+   */
+  float t = min(NIter, nTransition) / nTransition;
+  switch (Active) {
+    case 2:
+      for (int i = 0; i < 3; i++) { Active_PID[i] = PID_1[i] + t * (PID_2[i] - PID_1[i]); }
+      U_bar = U_bar1 + t * (U_bar2 - U_bar1);
+      break;
+    case 1:
+      for (int i = 0; i < 3; i++) { Active_PID[i] = PID_2[i] + t * (PID_1[i] - PID_2[i]); }
+      U_bar = U_bar2 + t * (U_bar1 - U_bar2);
+      break;
+    default:
+      break;
+  }
+
+  /* 
+   * Pour les 200 premières itérations, on va tout droit et on force le PID 1
+   */
+  if (nLoop < 200) {
+    psiDot = 0;
+    Active = 1;
+    U_bar = U_bar1;
+    for (int i = 0; i < 3; i++) { Active_PID[i] = PID_1[i]; }
+  }
 
   float lambda = linePositionIntToFloat(linePosition);
 
@@ -107,9 +125,8 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
 
   U_plus = min(24, max(0, U_plus));
 
-  if (nLoop < 200) U_minus = min(5, max(-5, U_minus));
+  if (nLoop < 200) U_minus = min(2, max(-2, U_minus));
 
-  //U_minus = tension_moteur_g - tension_moteur_d
 
   float rot_mot_l = (U_plus + U_minus) / U_battery / 2;
   float rot_mot_r = (U_plus - U_minus) / U_battery / 2;
