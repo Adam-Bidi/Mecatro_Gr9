@@ -31,7 +31,7 @@ void setup() {
   setupSensor();
 
   unsigned int const nVariables = 9;
-  String variableNames[nVariables] = {"Position ligne", "Uplus", "Umoins", "IntU", "Vitesse", "psi", "intLambda", "dt", "psiDot"};
+  String variableNames[nVariables] = {"Mode actif", "Uplus", "Umoins", "IntU", "dt", "psi", "intLambda", "lambda", "moyPsiDot"};
   mecatro::initTelemetry(WIFI_SSID, WIFI_PASSWRD, nVariables, variableNames, CONTROL_LOOP_PERIOD);
   Serial.println("Telemetry");
 
@@ -62,13 +62,14 @@ void mecatro::controlLoop() {
   EncoderData data = readEncoders();
   int32_t position = readSensor();
 
+  // compteur en cas de perte de ligne
   if (abs(position) > 127) {
     lostCounter++;
   } else {
     lostCounter = 0;
   }
 
-  if (lostCounter > LOST_LIMIT) { //Si le robot a perdu la ligne pendant 1 seconde, on arrête les moteurs par sécurité
+  if (lostCounter > LOST_LIMIT) { //Si le robot a perdu la ligne pendant trop longtemps, on arrête les moteurs par sécurité
     mecatro::setMotorDutyCycle(0.0, 0.0);
     Serial.println("Ligne perdue trop longtemps, arrêt de sécurité.");
     while (true);;

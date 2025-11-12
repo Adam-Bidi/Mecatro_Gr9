@@ -38,6 +38,7 @@ int32_t readSensor() {
   }
     previousPos = linePosRaw;
 
+  // Si on détecte la ligne sur l'ensemble des diodes du capteur, le robot est perpendiculaire au parcours ou alors le robot a été attrapé et soulevé du sol donc on l'arrête
   if (mySensorBar.getDensity() == 8) {
     mecatro::setMotorDutyCycle(0.0, 0.0);
     Serial.print("Ligne perdue, arrêt de sécurité. ");
