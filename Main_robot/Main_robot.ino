@@ -17,7 +17,7 @@
 int32_t psi_ref;
 float PID_1[3] = {672, 274, 672}; // T, T_i, T_d
 float PID_2[3] = {672, 274, 672};
-float gains[4] = {39, 0.01, 0.01, 1.}; //Les valeurs par défaut des gains du PID : S_i, U_bar1, U_bar2
+float gains[4] = {39, 0.01, 0.01, 1.}; //Les valeurs par défaut des gains du PID : S_i, U_bar1, U_bar2, psiDotSeuil
 
 int lostCounter = 0;
 const int LOST_LIMIT = 200;
