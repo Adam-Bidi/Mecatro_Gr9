@@ -8,7 +8,7 @@
 #include "encodersModule.h"
 #include "sensorData.h"
 
-const float U_battery = 11.2;
+const float U_battery = 10.8;
 int32_t NIter = 200;
 
 float dt = 5e-3; //On initialise le dt à 5 ms, qui correspond à CONTROL_LOOP_PERIOD
@@ -32,7 +32,7 @@ float Active_PID[3];
 // 1 : PID_1, 2 : PID_2, 3 : PID_1->PID_2, 4 : PID_2->PID_1
 int Active = 1;
 float U_bar;
-const int nTransition = 10;  // Nombre de points pour la transition
+const int nTransition = 5;  // Nombre de points pour la transition
 
 float integrale(float lambda) {
   integral += lambda * dt;
@@ -100,9 +100,9 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
   }
 
   /* 
-   * Pour les 200 premières itérations, on va tout droit et on force le PID 1
+   * Pour les 100 premières itérations, on va tout droit et on force le PID 1
    */
-  if (nLoop < 200) {
+  if (nLoop < 100) {
     psiDot = 0;
     Active = 1;
     U_bar = U_bar1;
@@ -120,12 +120,12 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
   float U_minus = - T * lambda - T_d * psi - T_i * integrale(lambda);
   // float U_minus = 0;
 
-  float U_i = integraleU(leftAngle + rightAngle - psi_ref, U_bar * nLoop / 200);
+  float U_i = integraleU(leftAngle + rightAngle - psi_ref, U_bar * nLoop / 100);
   float U_plus = S_i * U_i;
 
   U_plus = min(24, max(0, U_plus));
 
-  if (nLoop < 200) U_minus = min(2, max(-2, U_minus));
+  if (nLoop < 100) U_minus = min(2, max(-2, U_minus));
 
 
   float rot_mot_l = (U_plus + U_minus) / U_battery / 2;
@@ -144,7 +144,7 @@ MotorPWM controleur(EncoderData data, int32_t linePosition, float PID_1[3], floa
   prevTime = currentTime;
   currentTime = micros(); // On utilise micros() pour plus de précision
   dt = min(10e-3, (currentTime - prevTime) * 1e-6); // On convertit les microsecondes en secondes
-  if (nLoop < 200) {
+  if (nLoop < 100) {
     nLoop += 1;
   }
   return MotorPWM{rot_mot_l, rot_mot_r};

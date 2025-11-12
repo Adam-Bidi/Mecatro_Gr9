@@ -9,22 +9,22 @@ port_name = '/dev/cu.usbmodemF412FA70B6442';
 baudrate = 230400;
 
 %Recording time
-Tmax = 30;
+Tmax = 40;
 
 %Communication method
 method = 'WiFi';
 
 %Gains
-uBar1 = 0.6;
-sigma = 10;
+uBar1 = 0.55;
+sigma = 9;
 coeffs = K(uBar1, sigma);
 K1_send = [coeffs(2),  coeffs(1), coeffs(3)];
 
-uBar2 = 0.4;
-sigma = 8;
+uBar2 = 0.5;
+sigma = 9;
 coeffs = K(uBar2, sigma);
 K2_send = [coeffs(2),  coeffs(1), coeffs(3)];
-gains = [39, uBar1, uBar2, 4.];
+gains = [39, uBar1, uBar2, 3.5];
 
 K_send = [K1_send, K2_send, gains]
 
